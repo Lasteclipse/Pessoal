@@ -6,7 +6,7 @@ sg.theme('DarkGrey10')  #Define o tema da tela principal.
 
 layout = [  #Define a organização do layout e seus paramêtros
     [sg.Text(size=(20, 1)), sg.Text('Bem vindo ao Conversor')],
-    [sg.Text()],
+    [sg.Text(size=(13, 1)), sg.Text('Realize a conversão de seus vídeos para MP3')],
     [sg.Text("Escolha o arquivo a converter:", size=(22, 1)), sg.Input(size=(27, 1), tooltip='Diretório do arquivo', key='-arquivo-', background_color='black'), sg.FileBrowse('Procurar', size=(10, 1))],
     [sg.Text(size=(10, 1)), sg.Checkbox('Renomear', key='-renomear-', enable_events=True), sg.InputText(size=(27, 1), disabled=True, key='-novonome-', background_color='black', disabled_readonly_background_color='grey')],
     [sg.Text(size=(10, 1)), sg.Checkbox('Salvar Em', key='-novodir-', enable_events=True), sg.Input(size=(27, 1), tooltip='Diretório do arquivo', disabled=True, key='-direct-', disabled_readonly_background_color='grey', background_color='black'), sg.FolderBrowse('Procurar', size=(10, 1), disabled=True, key='-browse2-')],
