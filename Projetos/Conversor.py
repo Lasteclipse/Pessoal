@@ -2,10 +2,10 @@ import PySimpleGUI as sg
 from moviepy.editor import VideoFileClip
 from os import path, environ
 
-sg.theme('DarkGrey10')  #define o tema da tela principal.
+sg.theme('DarkGrey10')  #Define o tema da tela principal.
 
-layout = [
-    [sg.Text(size=(20, 1)), sg.Text('Bem Vindo ao Conversor')],
+layout = [  #Define a organização do layout e seus paramêtros
+    [sg.Text(size=(20, 1)), sg.Text('Bem vindo ao Conversor')],
     [sg.Text()],
     [sg.Text("Escolha o arquivo a converter:", size=(22, 1)), sg.Input(size=(27, 1), tooltip='Diretório do arquivo', key='-arquivo-', background_color='black'), sg.FileBrowse('Procurar', size=(10, 1))],
     [sg.Text(size=(10, 1)), sg.Checkbox('Renomear', key='-renomear-', enable_events=True), sg.InputText(size=(27, 1), disabled=True, key='-novonome-', background_color='black', disabled_readonly_background_color='grey')],
@@ -21,68 +21,76 @@ while True:
 
     valido = bool
 
-    if button in (sg.WIN_CLOSED, '_EXIT_', 'Close'):
+    if button in (sg.WIN_CLOSED, '_EXIT_', 'Close'):  #Evita erros ao fechar programa
         quit()
 
-    if values['-renomear-']:
+    if values['-renomear-']:  #Ativa campo renomear
         window['-novonome-'].update(disabled=False)
 
-    elif not values['-renomear-']:
+    elif not values['-renomear-']:  #Desativa campo renomear
         window['-novonome-'].update(disabled=True)
 
-    if values['-novodir-']:
+    if values['-novodir-']:  #Ativa campo diretório
         window['-direct-'].update(disabled=False)
         window['-browse2-'].update(disabled=False)
 
-    elif not values['-novodir-']:
+    elif not values['-novodir-']:  #Desativa campo diretório
         window['-direct-'].update(disabled=True)
         window['-browse2-'].update(disabled=True)
 
-    if button == 'Salvar':  #começa a cadeia de validação
-        if values['-renomear-']:  #caso o botão "renomear" ativado
-            if window['-novonome-'].get() in '\/|?<>*:“' or len(window['-novonome-'].get()) > 260:
+    if button == 'Salvar':  #Começa a cadeia de validação
+        if values['-renomear-']:  #Caso o botão "renomear" ativado
+
+            if window['-novonome-'].get() in '':  #Caso o usuário tenha marcado a opção renomear e não informou o nome
+                nome = '/' + window['-arquivo-'].get().split('/')[-1]
+                valido = True
+
+            elif window['-novonome-'].get() in '\/|?<>*:“':  #Caso o usuarío preencha com caractéres inválidos
                 valido = False
-                if window['-novonome-'].get() in '\/|?<>*:“':
-                    window['-ajuste-'].set_size((8, 1))
-                    window['-mensagem-'].update(visible=True)
-                    window['-mensagem-'].update(text_color='red')
-                    window['-mensagem-'].update('O nome do seu arquivo possui algum caractér especial inválido')
-                else:
-                    window['-mensagem-'].update(text_color='red')
-                    window['-mensagem-'].update(visible=True)
-                    window['-mensagem-'].update('O nome de seu arquivo possui mais de 260 caracteres')
+                window['-ajuste-'].set_size((8, 1))
+                window['-mensagem-'].update(visible=True)
+                window['-mensagem-'].update(text_color='red')
+                window['-mensagem-'].update('O nome do seu arquivo possui algum caractér especial inválido')
+
+            elif len(window['-novonome-'].get()) > 260:  #Caso o nome seja muito grande
+                valido = False
+                window['-mensagem-'].update(text_color='red')
+                window['-mensagem-'].update(visible=True)
+                window['-mensagem-'].update('O nome de seu arquivo possui mais de 260 caracteres')
             else:
-                nome = '/' + window['-novonome-'].get()
+                nome = '/' + window['-novonome-'].get()  #Caso o campo esteja preenchido corretamente
                 valido = True
         else:
-            nome = '/' + window['-arquivo-'].get().split('/')[-1]  #caso o usuário não queira renomear
+            nome = '/' + window['-arquivo-'].get().split('/')[-1]  #Caso o usuário não queira renomear
             valido = True
 
         if values['-novodir-']:
-            if path.exists(window['-direct-'].get()):
+            if path.exists(window['-direct-'].get()):  #Verifica se o diretório existe
                 local = window['-direct-'].get() + nome
+
             else:
                 valido = False
                 window['-ajuste-'].set_size((18, 1))
                 window['-mensagem-'].update(visible=True)
                 window['-mensagem-'].update(text_color='red')
                 window['-mensagem-'].update('O diretório selecionado é inválido')
-        else:
+        else:  #Caso não queira informar diretório alternativo
             local = path.join(path.join(environ['USERPROFILE']), 'Desktop').replace('\\', '/') + nome
 
         if valido:
-            try:
+            try:  #Captura somente o audio do arquivo
                 videoclip = VideoFileClip(window['-arquivo-'].get())
-                audiosrc = videoclip.audio  #captura somente o audio do arquivo
+                audiosrc = videoclip.audio
                 audiosrc.write_audiofile(local + '.mp3')
 
-            except:
+            except:  #Caso haja algum erro durante a conversão
                 window['-ajuste-'].set_size((16, 1))
                 window['-mensagem-'].update(text_color='red')
                 window['-mensagem-'].update('Algo deu errado durante a conversão')
                 window['-mensagem-'].update(visible=True)
 
-            else:
+            else:  #Mensagem de finalização
+                window['-ajuste-'].set_size((26, 1))
                 window['-mensagem-'].update('Concluído')
                 window['-mensagem-'].update(text_color='green')
                 window['-mensagem-'].update(visible=True)
